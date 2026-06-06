@@ -90,6 +90,7 @@ const defaultState = {
     name: "",
     sex: "female",
     age: 30,
+    birthDate: "",
     height: 165,
     weight: 60,
     waist: "",
@@ -101,11 +102,13 @@ const defaultState = {
 };
 
 let state = loadState();
+let pediatricBmiRows = [];
 
 const ids = [
   "name",
   "sex",
   "age",
+  "birthDate",
   "height",
   "weight",
   "waist",
@@ -203,7 +206,9 @@ function calculateProfile() {
   const tdee = bmr * Number(p.activity);
   const target = targetCalories(tdee, p.goal, p.conditions);
   const waistHeight = p.waist ? Number(p.waist) / Number(p.height) : null;
-  return { bmi, bmr, tdee, target, waistHeight };
+  const ageMonths = getAgeMonths(p);
+  const pediatric = getPediatricBmiResult(bmi, p.sex, ageMonths);
+  return { bmi, bmr, tdee, target, waistHeight, ageMonths, pediatric };
 }
 
 function targetCalories(tdee, goal, conditions) {
@@ -216,13 +221,98 @@ function targetCalories(tdee, goal, conditions) {
 }
 
 function bmiCategory(bmi, age, conditions) {
-  if (age < 18 || conditions.includes("teen")) {
+  if (age <= 18 || conditions.includes("teen")) {
     return { text: "儿童青少年需按年龄和性别看生长百分位", cls: "risk-warn" };
   }
   if (bmi < 18.5) return { text: "偏瘦", cls: "risk-warn" };
   if (bmi < 24) return { text: "正常范围", cls: "risk-ok" };
   if (bmi < 28) return { text: "超重", cls: "risk-warn" };
   return { text: "肥胖风险较高", cls: "risk-high" };
+}
+
+function getAgeMonths(profile) {
+  if (profile.birthDate) {
+    const birth = new Date(`${profile.birthDate}T00:00:00`);
+    const now = new Date();
+    if (!Number.isNaN(birth.getTime()) && birth <= now) {
+      const years = now.getFullYear() - birth.getFullYear();
+      const months = now.getMonth() - birth.getMonth();
+      const dayAdjust = now.getDate() < birth.getDate() ? -1 : 0;
+      return years * 12 + months + dayAdjust;
+    }
+  }
+  const age = Number(profile.age);
+  return Number.isFinite(age) ? Math.round(age * 12 + 6) : null;
+}
+
+function getPediatricBmiResult(bmi, sex, ageMonths) {
+  if (!Number.isFinite(bmi) || !Number.isFinite(ageMonths)) return null;
+  if (ageMonths < 24) {
+    return {
+      available: false,
+      text: "2岁以下不适合使用 BMI-for-age 百分位，建议使用婴幼儿生长曲线并咨询儿科医生。"
+    };
+  }
+  if (ageMonths > 240 || !pediatricBmiRows.length) {
+    return {
+      available: false,
+      text: pediatricBmiRows.length ? "儿童青少年 BMI 百分位适用于 2-20 岁。" : "儿童青少年 BMI 百分位数据正在加载。"
+    };
+  }
+  const sexCode = sex === "male" ? 1 : 2;
+  const row = interpolatePediatricRow(sexCode, ageMonths);
+  if (!row) return null;
+  const z = row.L === 0
+    ? Math.log(bmi / row.M) / row.S
+    : (Math.pow(bmi / row.M, row.L) - 1) / (row.L * row.S);
+  const percentile = normalCdf(z) * 100;
+  return {
+    available: true,
+    percentile,
+    z,
+    category: pediatricCategory(percentile),
+    ageMonths
+  };
+}
+
+function interpolatePediatricRow(sexCode, ageMonths) {
+  const rows = pediatricBmiRows.filter((row) => row.sex === sexCode);
+  if (!rows.length) return null;
+  const exact = rows.find((row) => row.ageMonths === ageMonths);
+  if (exact) return exact;
+  const lower = [...rows].reverse().find((row) => row.ageMonths <= ageMonths);
+  const upper = rows.find((row) => row.ageMonths >= ageMonths);
+  if (!lower) return upper;
+  if (!upper) return lower;
+  if (lower.ageMonths === upper.ageMonths) return lower;
+  const ratio = (ageMonths - lower.ageMonths) / (upper.ageMonths - lower.ageMonths);
+  return {
+    sex: sexCode,
+    ageMonths,
+    L: lower.L + (upper.L - lower.L) * ratio,
+    M: lower.M + (upper.M - lower.M) * ratio,
+    S: lower.S + (upper.S - lower.S) * ratio
+  };
+}
+
+function normalCdf(z) {
+  const sign = z < 0 ? -1 : 1;
+  const x = Math.abs(z) / Math.sqrt(2);
+  const t = 1 / (1 + 0.3275911 * x);
+  const a1 = 0.254829592;
+  const a2 = -0.284496736;
+  const a3 = 1.421413741;
+  const a4 = -1.453152027;
+  const a5 = 1.061405429;
+  const erf = 1 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-x * x);
+  return 0.5 * (1 + sign * erf);
+}
+
+function pediatricCategory(percentile) {
+  if (percentile < 5) return "偏瘦";
+  if (percentile < 85) return "健康体重范围";
+  if (percentile < 95) return "超重范围";
+  return "肥胖范围";
 }
 
 function waistCategory(ratio) {
@@ -259,7 +349,8 @@ function profileFromForm() {
   state.profile = {
     name: el.name.value.trim(),
     sex: el.sex.value,
-    age: Number(el.age.value),
+  age: Number(el.age.value),
+    birthDate: el.birthDate.value,
     height: Number(el.height.value),
     weight: Number(el.weight.value),
     waist: el.waist.value ? Number(el.waist.value) : "",
@@ -274,6 +365,7 @@ function fillForm() {
   el.name.value = p.name || "";
   el.sex.value = p.sex;
   el.age.value = p.age;
+  el.birthDate.value = p.birthDate || "";
   el.height.value = p.height;
   el.weight.value = p.weight;
   el.waist.value = p.waist || "";
@@ -290,8 +382,16 @@ function renderMetrics() {
   const category = bmiCategory(calc.bmi, state.profile.age, state.profile.conditions);
   document.getElementById("bmiValue").textContent = calc.bmi ? calc.bmi.toFixed(1) : "--";
   const bmiText = document.getElementById("bmiText");
-  bmiText.textContent = category.text;
-  bmiText.className = category.cls;
+  if (isPediatricProfile(state.profile) && calc.pediatric?.available) {
+    bmiText.textContent = `第 ${Math.round(calc.pediatric.percentile)} 百分位，${calc.pediatric.category}`;
+    bmiText.className = calc.pediatric.percentile >= 95 || calc.pediatric.percentile < 5 ? "risk-warn" : "risk-ok";
+  } else if (isPediatricProfile(state.profile) && calc.pediatric) {
+    bmiText.textContent = calc.pediatric.text;
+    bmiText.className = "risk-warn";
+  } else {
+    bmiText.textContent = category.text;
+    bmiText.className = category.cls;
+  }
   document.getElementById("bmrValue").textContent = formatKcal(calc.bmr);
   document.getElementById("tdeeValue").textContent = formatKcal(calc.tdee);
   document.getElementById("targetValue").textContent = formatKcal(calc.target);
@@ -323,13 +423,19 @@ function renderNarrative(calc, category) {
   const net = totals.intake - totals.exercise;
   const target = Math.round(calc.target);
   const balance = Number.isFinite(target) ? net - target : 0;
-  const isTeen = p.age < 18 || p.conditions.includes("teen");
+  const isTeen = p.age <= 18 || p.conditions.includes("teen");
   const isPregnancy = p.conditions.includes("pregnancy");
   const flags = [];
   const actions = [];
 
   if (isTeen) {
-    flags.push("未成年人：需要按年龄、性别、生长曲线和百分位判断，不能直接套成人 BMI。");
+    if (calc.pediatric?.available) {
+      flags.push(`儿童青少年 BMI：约第 ${Math.round(calc.pediatric.percentile)} 百分位，属于“${calc.pediatric.category}”。`);
+    } else if (calc.pediatric?.text) {
+      flags.push(calc.pediatric.text);
+    } else {
+      flags.push("未成年人：需要按年龄、性别、生长曲线和百分位判断，不能直接套成人 BMI。");
+    }
     actions.push("让监护人记录身高体重趋势，优先保证睡眠、蛋白质、蔬菜和规律运动。");
   } else if (calc.bmi < 18.5) {
     flags.push("BMI 偏低：可能存在能量摄入不足、肌肉量不足或近期体重下降问题。");
@@ -399,7 +505,9 @@ function renderNarrative(calc, category) {
 
 function riskSummary(calc, profile, balance, totals) {
   let score = 0;
-  if (profile.age < 18 || profile.conditions.includes("teen")) score += 2;
+  if (profile.age <= 18 || profile.conditions.includes("teen")) score += 2;
+  if (calc.pediatric?.available && (calc.pediatric.percentile < 5 || calc.pediatric.percentile >= 95)) score += 2;
+  else if (calc.pediatric?.available && calc.pediatric.percentile >= 85) score += 1;
   if (profile.conditions.includes("pregnancy")) score += 2;
   if (["diabetes", "hypertension", "hyperlipidemia", "kidney", "heart"].some((key) => profile.conditions.includes(key))) score += 2;
   if (calc.bmi < 18.5 || calc.bmi >= 28) score += 2;
@@ -427,6 +535,29 @@ function riskSummary(calc, profile, balance, totals) {
     label: "整体较稳定",
     summary: "从当前输入看，体重和能量目标较可控，继续保持记录并观察 2-4 周趋势。"
   };
+}
+
+function isPediatricProfile(profile) {
+  return Number(profile.age) <= 18 || profile.conditions.includes("teen");
+}
+
+async function loadPediatricBmiData() {
+  try {
+    const response = await fetch("./bmiagerev.csv?v=1");
+    const text = await response.text();
+    pediatricBmiRows = text.trim().split(/\r?\n/).slice(1).map((line) => {
+      const [sex, ageMonths, L, M, S] = line.split(",");
+      return {
+        sex: Number(sex),
+        ageMonths: Number(ageMonths),
+        L: Number(L),
+        M: Number(M),
+        S: Number(S)
+      };
+    }).filter((row) => Number.isFinite(row.sex) && Number.isFinite(row.ageMonths));
+  } catch {
+    pediatricBmiRows = [];
+  }
 }
 
 function dedupe(items) {
@@ -635,6 +766,10 @@ function bindEvents() {
   document.getElementById("exerciseForm").addEventListener("submit", addExercise);
   document.getElementById("manualTotalsForm").addEventListener("submit", saveManualTotals);
   document.getElementById("clearManualTotalsBtn").addEventListener("click", clearManualTotals);
+  document.getElementById("balanceHelpBtn").addEventListener("click", () => {
+    const popover = document.getElementById("balanceHelp");
+    popover.hidden = !popover.hidden;
+  });
   el.foodSearch.addEventListener("input", renderFoodLibrary);
 
   document.getElementById("foodList").addEventListener("click", deleteRecord);
@@ -700,4 +835,4 @@ if ("serviceWorker" in navigator && location.protocol !== "file:") {
 
 fillForm();
 bindEvents();
-renderAll();
+loadPediatricBmiData().finally(renderAll);

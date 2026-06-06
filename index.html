@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#1f7a5a" />
     <title>AI健康助手 第一版</title>
     <link rel="manifest" href="./manifest.webmanifest" />
-    <link rel="stylesheet" href="./styles.css?v=4" />
+    <link rel="stylesheet" href="./styles.css?v=5" />
   </head>
   <body>
     <header class="app-header">
@@ -50,6 +50,11 @@
           <label>
             年龄
             <input id="age" type="number" min="1" max="120" value="30" />
+          </label>
+
+          <label>
+            出生日期（18岁及以下）
+            <input id="birthDate" type="date" />
           </label>
 
           <label>
@@ -155,8 +160,14 @@
               <strong id="todayExercise">0 kcal</strong>
             </div>
             <div class="summary-line">
-              <span>相对目标</span>
+              <span class="label-with-help">
+                相对目标
+                <button class="help-button" id="balanceHelpBtn" type="button" aria-label="查看相对目标解释">?</button>
+              </span>
               <strong id="todayBalance">--</strong>
+            </div>
+            <div class="help-popover" id="balanceHelp" hidden>
+              相对目标 = 今日摄入热量 - 运动消耗热量 - 建议目标热量。显示“超出”表示今天净摄入高于目标；显示“低于”表示今天净摄入低于目标。这个数值是估算，用来帮助观察趋势，不代表医学诊断。
             </div>
             <form id="manualTotalsForm" class="quick-edit-form" aria-label="手动编辑今日热量">
               <div class="inline-fields">
@@ -339,6 +350,6 @@
       </div>
     </template>
 
-    <script src="./app.js?v=4"></script>
+    <script src="./app.js?v=5"></script>
   </body>
 </html>
