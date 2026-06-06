@@ -1,0 +1,5 @@
+preview*.png
+server*.log
+edge-preview-profile*/
+.DS_Store
+Thumbs.db
