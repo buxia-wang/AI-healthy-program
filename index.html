@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#1f7a5a" />
     <title>AI健康助手 第一版</title>
     <link rel="manifest" href="./manifest.webmanifest" />
-    <link rel="stylesheet" href="./styles.css?v=7" />
+    <link rel="stylesheet" href="./styles.css?v=8" />
   </head>
   <body>
     <header class="app-header">
@@ -292,9 +292,10 @@
             </div>
             <form id="exerciseForm" class="stack-form">
               <label>
-                运动类型
-                <select id="exerciseSelect"></select>
+                搜索运动
+                <input id="exerciseSearch" type="search" placeholder="例如：快走、慢跑、家务" />
               </label>
+              <div class="multi-picker" id="exerciseMultiPicker" aria-label="运动多选"></div>
               <div class="inline-fields">
                 <label>
                   分钟
@@ -309,6 +310,7 @@
                   </select>
                 </label>
               </div>
+              <p id="exerciseSelectedHint" class="hint-text">可一次勾选多个运动，分钟和强度会应用到所有勾选项。</p>
               <button class="primary-button" type="submit">加入今日运动</button>
             </form>
           </section>
@@ -359,6 +361,6 @@
       </div>
     </template>
 
-    <script src="./app.js?v=7"></script>
+    <script src="./app.js?v=8"></script>
   </body>
 </html>

@@ -639,6 +639,46 @@ button:focus-visible {
   color: var(--text);
 }
 
+.exercise-choice {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  min-height: 58px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 10px;
+  color: var(--text);
+}
+
+.exercise-choice:has(input:checked) {
+  border-color: rgba(0, 113, 227, 0.5);
+  background: rgba(0, 113, 227, 0.06);
+}
+
+.exercise-choice input {
+  flex: 0 0 auto;
+  width: 16px;
+  min-height: 16px;
+  margin-top: 2px;
+  accent-color: var(--primary);
+  box-shadow: none;
+}
+
+.exercise-choice strong {
+  display: block;
+  font-size: 14px;
+  line-height: 1.25;
+}
+
+.exercise-choice span {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
 .food-choice:has(input:checked) {
   border-color: rgba(0, 113, 227, 0.5);
   background: rgba(0, 113, 227, 0.06);

@@ -148,7 +148,7 @@ const ids = [
   "foodQty",
   "customFoodCalories",
   "customFoodName",
-  "exerciseSelect",
+  "exerciseSearch",
   "exerciseMinutes",
   "intensity",
   "foodSearch"
@@ -631,9 +631,23 @@ function renderFoodOptions() {
 }
 
 function renderExerciseOptions() {
-  el.exerciseSelect.innerHTML = exerciseData
-    .map((item, index) => `<option value="${index}">${item.name}（MET ${item.met}）</option>`)
-    .join("");
+  const keyword = el.exerciseSearch.value.trim();
+  const list = exerciseData.filter((item) => matchesExercise(item, keyword));
+  document.getElementById("exerciseMultiPicker").innerHTML = list.map((item) => `
+    <label class="exercise-choice">
+      <input type="checkbox" value="${exerciseData.indexOf(item)}" />
+      <span>
+        <strong>${item.name}</strong>
+        <span>MET ${item.met}，用于估算运动消耗</span>
+      </span>
+    </label>
+  `).join("");
+  renderExerciseSelectedHint();
+}
+
+function matchesExercise(item, keyword) {
+  if (!keyword) return true;
+  return item.name.includes(keyword) || String(item.met).includes(keyword);
 }
 
 function renderFoodLibrary() {
@@ -797,17 +811,39 @@ function renderFoodSelectedHint() {
 
 function addExercise(event) {
   event.preventDefault();
-  const exercise = exerciseData[Number(el.exerciseSelect.value)];
   const minutes = Number(el.exerciseMinutes.value) || 1;
   const intensity = Number(el.intensity.value) || 1;
-  const kcal = exerciseCalories(exercise, minutes, state.profile.weight, intensity);
-  getDayRecord().exercises.push({
-    name: exercise.name,
-    detail: `${minutes} 分钟，强度修正 ${intensity}`,
-    kcal
+  let selected = getSelectedExerciseIndexes();
+  if (!selected.length) {
+    const firstVisible = document.querySelector("#exerciseMultiPicker input[type='checkbox']");
+    selected = firstVisible ? [Number(firstVisible.value)] : [];
+  }
+  selected.forEach((index) => {
+    const exercise = exerciseData[index];
+    const kcal = exerciseCalories(exercise, minutes, state.profile.weight, intensity);
+    getDayRecord().exercises.push({
+      name: exercise.name,
+      detail: `${minutes} 分钟，强度修正 ${intensity}`,
+      kcal
+    });
   });
+  document.querySelectorAll("#exerciseMultiPicker input:checked").forEach((input) => {
+    input.checked = false;
+  });
+  renderExerciseSelectedHint();
   saveState();
   renderDailySummary();
+}
+
+function getSelectedExerciseIndexes() {
+  return Array.from(document.querySelectorAll("#exerciseMultiPicker input:checked")).map((input) => Number(input.value));
+}
+
+function renderExerciseSelectedHint() {
+  const count = getSelectedExerciseIndexes().length;
+  document.getElementById("exerciseSelectedHint").textContent = count
+    ? `已选择 ${count} 项，点击后会一起加入今日运动。`
+    : "可一次勾选多个运动，分钟和强度会应用到所有勾选项。";
 }
 
 function bindEvents() {
@@ -870,6 +906,8 @@ function bindEvents() {
   });
   el.foodPickerSearch.addEventListener("input", renderFoodOptions);
   document.getElementById("foodMultiPicker").addEventListener("change", renderFoodSelectedHint);
+  el.exerciseSearch.addEventListener("input", renderExerciseOptions);
+  document.getElementById("exerciseMultiPicker").addEventListener("change", renderExerciseSelectedHint);
   el.foodSearch.addEventListener("input", renderFoodLibrary);
 
   document.getElementById("foodList").addEventListener("click", deleteRecord);
