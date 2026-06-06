@@ -427,6 +427,25 @@ button:focus-visible {
   gap: 10px;
 }
 
+.title-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.total-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 38px;
+  border-radius: 999px;
+  background: rgba(19, 128, 95, 0.08);
+  color: var(--health);
+  font-size: 14px;
+  padding: 0 13px;
+}
+
 .hint-text {
   margin: 0;
   color: var(--muted);
@@ -521,6 +540,58 @@ button:focus-visible {
 .stack-form {
   display: grid;
   gap: 14px;
+}
+
+.multi-picker {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+  max-height: 264px;
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.72);
+  padding: 10px;
+}
+
+.food-choice {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  min-height: 58px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 10px;
+  color: var(--text);
+}
+
+.food-choice:has(input:checked) {
+  border-color: rgba(0, 113, 227, 0.5);
+  background: rgba(0, 113, 227, 0.06);
+}
+
+.food-choice input {
+  flex: 0 0 auto;
+  width: 16px;
+  min-height: 16px;
+  margin-top: 2px;
+  accent-color: var(--primary);
+  box-shadow: none;
+}
+
+.food-choice strong {
+  display: block;
+  font-size: 14px;
+  line-height: 1.25;
+}
+
+.food-choice span {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.35;
 }
 
 .inline-fields {
@@ -722,6 +793,10 @@ button:focus-visible {
     flex-direction: column;
   }
 
+  .title-actions {
+    justify-content: flex-start;
+  }
+
   .section-title h2 {
     font-size: 22px;
   }
@@ -748,6 +823,10 @@ button:focus-visible {
 
   .quick-actions {
     display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .multi-picker {
     grid-template-columns: 1fr;
   }
 }

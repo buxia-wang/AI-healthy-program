@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#1f7a5a" />
     <title>AI健康助手 第一版</title>
     <link rel="manifest" href="./manifest.webmanifest" />
-    <link rel="stylesheet" href="./styles.css?v=5" />
+    <link rel="stylesheet" href="./styles.css?v=6" />
   </head>
   <body>
     <header class="app-header">
@@ -227,9 +227,10 @@
             </div>
             <form id="foodForm" class="stack-form">
               <label>
-                常见食物
-                <select id="foodSelect"></select>
+                搜索常见食物
+                <input id="foodPickerSearch" type="search" placeholder="例如：米饭、牛肉面、沙拉、汉堡" />
               </label>
+              <div class="multi-picker" id="foodMultiPicker" aria-label="常见食物多选"></div>
               <div class="inline-fields">
                 <label>
                   份数
@@ -244,6 +245,7 @@
                 自定义名称
                 <input id="customFoodName" type="text" placeholder="例如：家里炒面" />
               </label>
+              <p id="foodSelectedHint" class="hint-text">可一次勾选多个常见食物，份数会应用到所有勾选项。</p>
               <button class="primary-button" type="submit">加入今日饮食</button>
             </form>
           </section>
@@ -254,7 +256,10 @@
                 <p class="eyebrow">今日</p>
                 <h2>饮食清单</h2>
               </div>
-              <button class="text-button" id="clearFoodsBtn" type="button">清空饮食</button>
+              <div class="title-actions">
+                <strong id="foodListTotal" class="total-badge">合计 0 kcal</strong>
+                <button class="text-button" id="clearFoodsBtn" type="button">清空饮食</button>
+              </div>
             </div>
             <div id="foodList" class="record-list"></div>
           </section>
@@ -350,6 +355,6 @@
       </div>
     </template>
 
-    <script src="./app.js?v=5"></script>
+    <script src="./app.js?v=6"></script>
   </body>
 </html>

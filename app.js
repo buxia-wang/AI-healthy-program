@@ -24,7 +24,33 @@ const foodData = [
   { name: "核桃", serving: "2-3 个约 30g", grams: 30, kcal100: 646, category: "坚果" },
   { name: "食用油", serving: "1 汤勺约 10g", grams: 10, kcal100: 884, category: "调味" },
   { name: "奶茶", serving: "1 杯约 500ml", grams: 500, kcal100: 80, category: "饮品" },
-  { name: "可乐", serving: "1 听约 330ml", grams: 330, kcal100: 43, category: "饮品" }
+  { name: "可乐", serving: "1 听约 330ml", grams: 330, kcal100: 43, category: "饮品" },
+  { name: "番茄炒蛋", serving: "1 盘约 250g", grams: 250, kcal100: 105, category: "中餐菜肴" },
+  { name: "宫保鸡丁", serving: "1 盘约 250g", grams: 250, kcal100: 165, category: "中餐菜肴" },
+  { name: "鱼香肉丝", serving: "1 盘约 250g", grams: 250, kcal100: 175, category: "中餐菜肴" },
+  { name: "麻婆豆腐", serving: "1 盘约 250g", grams: 250, kcal100: 130, category: "中餐菜肴" },
+  { name: "红烧肉", serving: "1 小份约 150g", grams: 150, kcal100: 360, category: "中餐菜肴" },
+  { name: "清蒸鱼", serving: "1 份约 200g", grams: 200, kcal100: 125, category: "中餐菜肴" },
+  { name: "水煮牛肉", serving: "1 份约 300g", grams: 300, kcal100: 185, category: "中餐菜肴" },
+  { name: "青椒肉丝", serving: "1 盘约 250g", grams: 250, kcal100: 145, category: "中餐菜肴" },
+  { name: "炒饭", serving: "1 盘约 300g", grams: 300, kcal100: 175, category: "中餐主食" },
+  { name: "牛肉面", serving: "1 碗约 500g", grams: 500, kcal100: 115, category: "中餐主食" },
+  { name: "兰州拉面", serving: "1 碗约 500g", grams: 500, kcal100: 105, category: "中餐主食" },
+  { name: "饺子", serving: "10 个约 250g", grams: 250, kcal100: 220, category: "中餐主食" },
+  { name: "小笼包", serving: "6 个约 180g", grams: 180, kcal100: 230, category: "中餐主食" },
+  { name: "粥", serving: "1 碗约 300g", grams: 300, kcal100: 46, category: "中餐主食" },
+  { name: "火锅", serving: "1 人份约 600g", grams: 600, kcal100: 150, category: "聚餐" },
+  { name: "烤鸭", serving: "1 份约 200g", grams: 200, kcal100: 300, category: "中餐菜肴" },
+  { name: "汉堡", serving: "1 个约 220g", grams: 220, kcal100: 250, category: "西餐快餐" },
+  { name: "薯条", serving: "1 中份约 120g", grams: 120, kcal100: 312, category: "西餐快餐" },
+  { name: "披萨", serving: "2 片约 200g", grams: 200, kcal100: 266, category: "西餐快餐" },
+  { name: "意大利面", serving: "1 盘约 300g", grams: 300, kcal100: 155, category: "西餐主食" },
+  { name: "牛排", serving: "1 份约 180g", grams: 180, kcal100: 220, category: "西餐菜肴" },
+  { name: "凯撒沙拉", serving: "1 份约 250g", grams: 250, kcal100: 135, category: "西餐菜肴" },
+  { name: "三明治", serving: "1 个约 180g", grams: 180, kcal100: 230, category: "西餐主食" },
+  { name: "燕麦粥", serving: "1 碗约 250g", grams: 250, kcal100: 70, category: "早餐" },
+  { name: "煎培根", serving: "3 片约 45g", grams: 45, kcal100: 540, category: "西餐早餐" },
+  { name: "鸡肉卷", serving: "1 个约 220g", grams: 220, kcal100: 210, category: "西餐快餐" }
 ];
 
 const exerciseData = [
@@ -117,7 +143,7 @@ const ids = [
   "recordDate",
   "manualIntake",
   "manualExercise",
-  "foodSelect",
+  "foodPickerSearch",
   "foodQty",
   "customFoodCalories",
   "customFoodName",
@@ -565,9 +591,18 @@ function dedupe(items) {
 }
 
 function renderFoodOptions() {
-  el.foodSelect.innerHTML = foodData
-    .map((food, index) => `<option value="${index}">${food.name}（${food.serving}，约 ${caloriesForFood(food)} kcal）</option>`)
-    .join("");
+  const keyword = el.foodPickerSearch.value.trim();
+  const list = foodData.filter((food) => matchesFood(food, keyword)).slice(0, 40);
+  document.getElementById("foodMultiPicker").innerHTML = list.map((food) => `
+    <label class="food-choice">
+      <input type="checkbox" value="${foodData.indexOf(food)}" />
+      <span>
+        <strong>${food.name}</strong>
+        <span>${food.category}，${food.serving}，约 ${caloriesForFood(food)} kcal</span>
+      </span>
+    </label>
+  `).join("");
+  renderFoodSelectedHint();
 }
 
 function renderExerciseOptions() {
@@ -578,7 +613,7 @@ function renderExerciseOptions() {
 
 function renderFoodLibrary() {
   const keyword = el.foodSearch.value.trim();
-  const list = foodData.filter((food) => !keyword || food.name.includes(keyword) || food.category.includes(keyword));
+  const list = foodData.filter((food) => matchesFood(food, keyword));
   document.getElementById("foodLibrary").innerHTML = list.map((food) => `
     <article class="library-card">
       <strong>${food.name}</strong>
@@ -586,6 +621,11 @@ function renderFoodLibrary() {
       <p>约 ${caloriesForFood(food)} kcal，${food.kcal100} kcal/100g</p>
     </article>
   `).join("");
+}
+
+function matchesFood(food, keyword) {
+  if (!keyword) return true;
+  return food.name.includes(keyword) || food.category.includes(keyword) || food.serving.includes(keyword);
 }
 
 function renderDailySummary() {
@@ -610,6 +650,7 @@ function renderDailySummary() {
     ? `当前使用手动总数。清单汇总为：饮食 ${totals.foodTotal} kcal，运动 ${totals.exerciseTotal} kcal。`
     : "留空时，系统会按饮食和运动清单自动汇总。";
   document.getElementById("todayAdvice").textContent = dailyAdvice(balance, intake, target);
+  document.getElementById("foodListTotal").textContent = `合计 ${totals.foodTotal} kcal`;
   renderRecords("foodList", record.foods, "food");
   renderRecords("exerciseList", record.exercises, "exercise");
 }
@@ -685,22 +726,48 @@ function addFood(event) {
   const customKcal = Number(el.customFoodCalories.value);
   const customName = el.customFoodName.value.trim();
   const qty = Number(el.foodQty.value) || 1;
-  let item;
+  const selectedFoods = getSelectedFoodIndexes();
   if (customKcal && customName) {
-    item = { name: customName, detail: "自定义记录", kcal: Math.round(customKcal) };
-  } else {
-    const food = foodData[Number(el.foodSelect.value)];
-    item = {
+    getDayRecord().foods.push({ name: customName, detail: "自定义记录", kcal: Math.round(customKcal) });
+  }
+  selectedFoods.forEach((index) => {
+    const food = foodData[index];
+    getDayRecord().foods.push({
       name: food.name,
       detail: `${qty} 份，${food.serving}`,
       kcal: caloriesForFood(food, qty)
-    };
+    });
+  });
+  if (!customKcal && !customName && !selectedFoods.length) {
+    const firstVisible = document.querySelector("#foodMultiPicker input[type='checkbox']");
+    if (firstVisible) {
+      const food = foodData[Number(firstVisible.value)];
+      getDayRecord().foods.push({
+        name: food.name,
+        detail: `${qty} 份，${food.serving}`,
+        kcal: caloriesForFood(food, qty)
+      });
+    }
   }
-  getDayRecord().foods.push(item);
   el.customFoodCalories.value = "";
   el.customFoodName.value = "";
+  document.querySelectorAll("#foodMultiPicker input:checked").forEach((input) => {
+    input.checked = false;
+  });
+  renderFoodSelectedHint();
   saveState();
   renderDailySummary();
+}
+
+function getSelectedFoodIndexes() {
+  return Array.from(document.querySelectorAll("#foodMultiPicker input:checked")).map((input) => Number(input.value));
+}
+
+function renderFoodSelectedHint() {
+  const count = getSelectedFoodIndexes().length;
+  document.getElementById("foodSelectedHint").textContent = count
+    ? `已选择 ${count} 项，点击后会一起加入今日饮食。`
+    : "可一次勾选多个常见食物，份数会应用到所有勾选项。";
 }
 
 function addExercise(event) {
@@ -770,6 +837,8 @@ function bindEvents() {
     const popover = document.getElementById("balanceHelp");
     popover.hidden = !popover.hidden;
   });
+  el.foodPickerSearch.addEventListener("input", renderFoodOptions);
+  document.getElementById("foodMultiPicker").addEventListener("change", renderFoodSelectedHint);
   el.foodSearch.addEventListener("input", renderFoodLibrary);
 
   document.getElementById("foodList").addEventListener("click", deleteRecord);
