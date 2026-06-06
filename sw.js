@@ -1,5 +1,5 @@
-const CACHE_NAME = "ai-health-helper-v6";
-const ASSETS = ["./", "./index.html", "./styles.css?v=6", "./app.js?v=6", "./bmiagerev.csv?v=1", "./manifest.webmanifest"];
+const CACHE_NAME = "ai-health-helper-v7";
+const ASSETS = ["./", "./index.html", "./styles.css?v=7", "./app.js?v=7", "./bmiagerev.csv?v=1", "./manifest.webmanifest"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS)));

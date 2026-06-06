@@ -6,10 +6,14 @@
     <meta name="theme-color" content="#1f7a5a" />
     <title>AI健康助手 第一版</title>
     <link rel="manifest" href="./manifest.webmanifest" />
-    <link rel="stylesheet" href="./styles.css?v=6" />
+    <link rel="stylesheet" href="./styles.css?v=7" />
   </head>
   <body>
     <header class="app-header">
+      <div class="mode-switch" aria-label="页面模式">
+        <button class="mode-button active" id="normalModeBtn" type="button" data-mode="normal">正常模式</button>
+        <button class="mode-button" id="elderlyModeBtn" type="button" data-mode="elderly">老年模式</button>
+      </div>
       <div class="brand-lockup">
         <p class="eyebrow">家庭健康计算与习惯管理</p>
         <h1>AI健康助手</h1>
@@ -52,7 +56,7 @@
             <input id="age" type="number" min="1" max="120" value="30" />
           </label>
 
-          <label>
+          <label class="advanced-field">
             出生日期（18岁及以下）
             <input id="birthDate" type="date" />
           </label>
@@ -67,7 +71,7 @@
             <input id="weight" type="number" min="20" max="250" step="0.1" value="60" />
           </label>
 
-          <label>
+          <label class="advanced-field">
             腰围 cm
             <input id="waist" type="number" min="30" max="200" step="0.1" placeholder="可选，建议填写" />
           </label>
@@ -94,7 +98,7 @@
           </label>
         </form>
 
-        <div class="condition-wrap" aria-label="特殊情况">
+        <div class="condition-wrap advanced-section" aria-label="特殊情况">
           <p class="field-title">特殊情况</p>
           <div class="chips" id="conditionChips">
             <label><input type="checkbox" value="teen" /> 儿童/青少年</label>
@@ -138,7 +142,7 @@
         <button class="tab active" data-tab="overview" type="button">概况</button>
         <button class="tab" data-tab="food" type="button">饮食</button>
         <button class="tab" data-tab="exercise" type="button">运动</button>
-        <button class="tab" data-tab="groups" type="button">人群提醒</button>
+        <button class="tab advanced-tab" data-tab="groups" type="button">人群提醒</button>
       </nav>
 
       <section class="tab-panel active" id="overview">
@@ -226,11 +230,11 @@
               </div>
             </div>
             <form id="foodForm" class="stack-form">
-              <label>
+              <label class="food-complex">
                 搜索常见食物
                 <input id="foodPickerSearch" type="search" placeholder="例如：米饭、牛肉面、沙拉、汉堡" />
               </label>
-              <div class="multi-picker" id="foodMultiPicker" aria-label="常见食物多选"></div>
+              <div class="multi-picker food-complex" id="foodMultiPicker" aria-label="常见食物多选"></div>
               <div class="inline-fields">
                 <label>
                   份数
@@ -245,7 +249,7 @@
                 自定义名称
                 <input id="customFoodName" type="text" placeholder="例如：家里炒面" />
               </label>
-              <p id="foodSelectedHint" class="hint-text">可一次勾选多个常见食物，份数会应用到所有勾选项。</p>
+              <p id="foodSelectedHint" class="hint-text food-complex">可一次勾选多个常见食物，份数会应用到所有勾选项。</p>
               <button class="primary-button" type="submit">加入今日饮食</button>
             </form>
           </section>
@@ -265,7 +269,7 @@
           </section>
         </div>
 
-        <section class="panel">
+        <section class="panel food-complex">
           <div class="section-title">
             <div>
               <p class="eyebrow">参考</p>
@@ -321,7 +325,7 @@
           </section>
         </div>
 
-        <section class="panel">
+        <section class="panel exercise-complex">
           <div class="section-title">
             <div>
               <p class="eyebrow">换算</p>
@@ -332,7 +336,7 @@
         </section>
       </section>
 
-      <section class="tab-panel" id="groups">
+      <section class="tab-panel advanced-section" id="groups">
         <section class="panel">
           <div class="section-title">
             <div>
@@ -355,6 +359,6 @@
       </div>
     </template>
 
-    <script src="./app.js?v=6"></script>
+    <script src="./app.js?v=7"></script>
   </body>
 </html>

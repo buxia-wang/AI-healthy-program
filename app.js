@@ -112,6 +112,7 @@ const groupAdviceMap = {
 };
 
 const defaultState = {
+  uiMode: "normal",
   profile: {
     name: "",
     sex: "female",
@@ -178,6 +179,17 @@ function saveState(status = "已保存") {
   document.getElementById("saveStatus").textContent = status;
   if (status === "已保存" || status === "已清空") {
     setHeaderEditing(false);
+  }
+}
+
+function applyUiMode(mode = state.uiMode || "normal") {
+  state.uiMode = mode;
+  document.body.classList.toggle("elderly-mode", mode === "elderly");
+  document.querySelectorAll(".mode-button").forEach((button) => {
+    button.classList.toggle("active", button.dataset.mode === mode);
+  });
+  if (mode === "elderly" && document.getElementById("groups").classList.contains("active")) {
+    switchTab("overview");
   }
 }
 
@@ -372,6 +384,9 @@ function formatKcal(value) {
 
 function profileFromForm() {
   const conditions = Array.from(document.querySelectorAll("#conditionChips input:checked")).map((item) => item.value);
+  if (state.uiMode === "elderly" && !conditions.includes("elderly")) {
+    conditions.push("elderly");
+  }
   state.profile = {
     name: el.name.value.trim(),
     sex: el.sex.value,
@@ -426,6 +441,16 @@ function renderMetrics() {
   renderGroupAdvice();
   renderDailySummary();
   renderDeficitOptions(calc);
+}
+
+function switchTab(tabId) {
+  document.querySelectorAll(".tab, .tab-panel").forEach((item) => item.classList.remove("active"));
+  const button = document.querySelector(`.tab[data-tab="${tabId}"]`);
+  const panel = document.getElementById(tabId);
+  if (button && panel) {
+    button.classList.add("active");
+    panel.classList.add("active");
+  }
 }
 
 function targetText(goal, conditions) {
@@ -797,9 +822,15 @@ function bindEvents() {
 
   document.querySelectorAll(".tab").forEach((button) => {
     button.addEventListener("click", () => {
-      document.querySelectorAll(".tab, .tab-panel").forEach((item) => item.classList.remove("active"));
-      button.classList.add("active");
-      document.getElementById(button.dataset.tab).classList.add("active");
+      switchTab(button.dataset.tab);
+    });
+  });
+
+  document.querySelectorAll(".mode-button").forEach((button) => {
+    button.addEventListener("click", () => {
+      applyUiMode(button.dataset.mode);
+      renderMetrics();
+      saveState("模式已保存");
     });
   });
 
@@ -903,5 +934,6 @@ if ("serviceWorker" in navigator && location.protocol !== "file:") {
 }
 
 fillForm();
+applyUiMode(state.uiMode);
 bindEvents();
 loadPediatricBmiData().finally(renderAll);
