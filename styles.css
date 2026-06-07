@@ -167,6 +167,43 @@ button {
   font-size: 18px;
 }
 
+.elderly-mode .today-hero {
+  grid-template-columns: 1fr;
+}
+
+.elderly-mode .hero-ring-card {
+  min-height: 220px;
+}
+
+.elderly-mode .hero-actions {
+  grid-column: auto;
+  grid-template-columns: 1fr;
+}
+
+.elderly-mode .hero-actions button {
+  min-height: 62px;
+  font-size: 20px;
+}
+
+.elderly-mode .hero-stat-grid article {
+  min-height: 78px;
+  padding: 18px 20px;
+}
+
+.elderly-mode .metric-strip {
+  grid-template-columns: 1fr 1fr;
+}
+
+.elderly-mode .metric-strip .metric p {
+  display: none;
+}
+
+.elderly-mode .tabbar {
+  position: sticky;
+  top: 108px;
+  z-index: 7;
+}
+
 .edit-actions {
   display: none;
   gap: 10px;
@@ -248,6 +285,203 @@ button {
 
 .profile-panel > * {
   position: relative;
+}
+
+.today-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(300px, 0.9fr);
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.hero-ring-card,
+.hero-stat-grid,
+.hero-actions {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(0, 0, 0, 0.085);
+  border-radius: 8px;
+  box-shadow: var(--shadow-soft);
+  backdrop-filter: blur(14px);
+}
+
+.hero-ring-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(18px, 3vw, 34px);
+  min-height: 246px;
+  padding: clamp(22px, 3vw, 34px);
+  background:
+    linear-gradient(135deg, rgba(19, 128, 95, 0.12), rgba(0, 113, 227, 0.065) 48%, rgba(255, 255, 255, 0.86)),
+    #ffffff;
+}
+
+.calorie-ring {
+  --ring-angle: 0deg;
+  display: grid;
+  place-items: center;
+  width: clamp(138px, 18vw, 184px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background:
+    conic-gradient(var(--health) 0deg var(--ring-angle), #e5ece9 var(--ring-angle) 360deg);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.035), 0 18px 36px rgba(19, 128, 95, 0.14);
+}
+
+.calorie-ring.ring-over {
+  background:
+    conic-gradient(var(--amber) 0deg var(--ring-angle), #efe8de var(--ring-angle) 360deg);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.035), 0 18px 36px rgba(168, 100, 0, 0.14);
+}
+
+.calorie-ring.ring-low {
+  background:
+    conic-gradient(var(--primary) 0deg var(--ring-angle), #e3eaf2 var(--ring-angle) 360deg);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.035), 0 18px 36px rgba(0, 113, 227, 0.13);
+}
+
+.ring-inner {
+  display: grid;
+  place-items: center;
+  width: calc(100% - 26px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 2px 0 rgba(255, 255, 255, 0.8) inset;
+}
+
+.ring-inner span {
+  font-size: clamp(30px, 3.8vw, 48px);
+  line-height: 1;
+  font-weight: 900;
+}
+
+.ring-inner small {
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.hero-copy h2 {
+  margin: 8px 0 10px;
+  max-width: 12em;
+  font-size: clamp(31px, 4.4vw, 56px);
+  line-height: 1.02;
+  font-weight: 900;
+  overflow-wrap: anywhere;
+  word-break: break-all;
+}
+
+.hero-copy p:last-child {
+  margin: 0;
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 1.65;
+}
+
+.hero-stat-grid {
+  display: grid;
+  gap: 0;
+  overflow: hidden;
+}
+
+.hero-stat-grid article {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 14px;
+  min-height: 82px;
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--line);
+}
+
+.hero-stat-grid article:last-child {
+  border-bottom: 0;
+}
+
+.hero-stat-grid span {
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.hero-stat-grid strong {
+  font-size: clamp(21px, 2.1vw, 29px);
+  font-weight: 900;
+}
+
+.hero-actions {
+  grid-column: 2;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding: 12px;
+}
+
+.profile-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 18;
+  display: none;
+  background: rgba(29, 29, 31, 0.22);
+  backdrop-filter: blur(6px);
+}
+
+.profile-drawer {
+  position: fixed;
+  top: 108px;
+  right: 0;
+  bottom: 0;
+  z-index: 19;
+  width: min(620px, calc(100vw - 20px));
+  margin: 0;
+  border-radius: 8px 0 0 8px;
+  border-right: 0;
+  overflow: auto;
+  transform: translateX(104%);
+  transition: transform 0.24s ease;
+}
+
+.header-editing .profile-backdrop {
+  display: block;
+}
+
+.header-editing .profile-drawer {
+  transform: translateX(0);
+}
+
+.metric-strip {
+  position: relative;
+}
+
+.selected-tray {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-height: 42px;
+  border: 1px dashed rgba(19, 128, 95, 0.26);
+  border-radius: 8px;
+  background: rgba(237, 248, 243, 0.68);
+  padding: 9px;
+}
+
+.selected-pill,
+.empty-selected {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  border-radius: 999px;
+  padding: 0 11px;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.selected-pill {
+  background: #ffffff;
+  color: var(--health);
+  border: 1px solid rgba(19, 128, 95, 0.2);
+}
+
+.empty-selected {
+  color: var(--muted);
 }
 
 .section-title {
@@ -795,6 +1029,14 @@ button:focus-visible {
 }
 
 @media (max-width: 980px) {
+  .today-hero {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-actions {
+    grid-column: auto;
+  }
+
   .form-grid,
   .results-grid,
   .two-column,
@@ -904,6 +1146,57 @@ button:focus-visible {
     margin-top: 24px;
   }
 
+  .today-hero {
+    gap: 10px;
+  }
+
+  .hero-ring-card {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    min-height: auto;
+    padding: 22px 18px;
+    text-align: center;
+  }
+
+  .calorie-ring {
+    width: min(54vw, 168px);
+  }
+
+  .hero-copy h2 {
+    max-width: 9em;
+    margin-right: auto;
+    margin-left: auto;
+    font-size: 26px;
+    line-height: 1.12;
+  }
+
+  .hero-stat-grid article {
+    grid-template-columns: 1fr;
+    justify-items: start;
+    min-height: 70px;
+    padding: 15px 16px;
+  }
+
+  .hero-stat-grid strong {
+    font-size: 24px;
+    white-space: normal;
+  }
+
+  .hero-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-drawer {
+    top: 122px;
+    width: 100%;
+    border-radius: 8px 8px 0 0;
+    transform: translateY(104%);
+  }
+
+  .header-editing .profile-drawer {
+    transform: translateY(0);
+  }
+
   .inline-fields,
   .form-grid,
   .results-grid,
@@ -960,5 +1253,13 @@ button:focus-visible {
   .elderly-mode .results-grid,
   .elderly-mode .two-column {
     grid-template-columns: 1fr;
+  }
+
+  .elderly-mode .metric-strip {
+    grid-template-columns: 1fr;
+  }
+
+  .elderly-mode .tabbar {
+    top: 122px;
   }
 }

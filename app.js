@@ -690,8 +690,35 @@ function renderDailySummary() {
     : "留空时，系统会按饮食和运动清单自动汇总。";
   document.getElementById("todayAdvice").textContent = dailyAdvice(balance, intake, target);
   document.getElementById("foodListTotal").textContent = `合计 ${totals.foodTotal} kcal`;
+  updateHeroDashboard({ intake, exercise, net, target, balance });
   renderRecords("foodList", record.foods, "food");
   renderRecords("exerciseList", record.exercises, "exercise");
+}
+
+function updateHeroDashboard({ intake, exercise, net, target, balance }) {
+  const hasTarget = Number.isFinite(target) && target > 0;
+  const ringPercent = hasTarget ? Math.max(0, net / target * 100) : 0;
+  const ringAngle = Math.min(360, ringPercent * 3.6);
+  const calorieRing = document.getElementById("calorieRing");
+  calorieRing.style.setProperty("--ring-angle", `${ringAngle}deg`);
+  calorieRing.classList.toggle("ring-over", hasTarget && balance > 250);
+  calorieRing.classList.toggle("ring-low", hasTarget && balance < -600);
+
+  document.getElementById("ringPercent").textContent = hasTarget ? `${Math.round(Math.min(999, ringPercent))}%` : "--";
+  document.getElementById("heroIntake").textContent = formatKcal(intake);
+  document.getElementById("heroExercise").textContent = formatKcal(exercise);
+  document.getElementById("heroBalance").textContent = hasTarget
+    ? `${balance >= 0 ? "超出" : "低于"} ${Math.abs(Math.round(balance))} kcal`
+    : "--";
+
+  let status = "先记录今天的饮食或运动";
+  if (hasTarget && intake > 0 && balance > 250) status = "今天已超出目标";
+  if (hasTarget && intake > 0 && balance < -600) status = "今天热量缺口偏大";
+  if (hasTarget && intake > 0 && Math.abs(balance) <= 250) status = "今天接近目标";
+  document.getElementById("heroStatus").textContent = status;
+  document.getElementById("heroMeta").textContent = hasTarget
+    ? `目标 ${target} kcal · 净摄入 ${Math.round(net)} kcal`
+    : "完善基础档案后，会显示目标和净摄入。";
 }
 
 function dailyAdvice(balance, intake, target) {
@@ -803,10 +830,14 @@ function getSelectedFoodIndexes() {
 }
 
 function renderFoodSelectedHint() {
-  const count = getSelectedFoodIndexes().length;
+  const selected = getSelectedFoodIndexes();
+  const count = selected.length;
   document.getElementById("foodSelectedHint").textContent = count
     ? `已选择 ${count} 项，点击后会一起加入今日饮食。`
     : "可一次勾选多个常见食物，份数会应用到所有勾选项。";
+  document.getElementById("foodSelectedTray").innerHTML = selected.length
+    ? selected.map((index) => `<span class="selected-pill">${foodData[index].name}</span>`).join("")
+    : `<span class="empty-selected">未选择食物</span>`;
 }
 
 function addExercise(event) {
@@ -840,10 +871,14 @@ function getSelectedExerciseIndexes() {
 }
 
 function renderExerciseSelectedHint() {
-  const count = getSelectedExerciseIndexes().length;
+  const selected = getSelectedExerciseIndexes();
+  const count = selected.length;
   document.getElementById("exerciseSelectedHint").textContent = count
     ? `已选择 ${count} 项，点击后会一起加入今日运动。`
     : "可一次勾选多个运动，分钟和强度会应用到所有勾选项。";
+  document.getElementById("exerciseSelectedTray").innerHTML = selected.length
+    ? selected.map((index) => `<span class="selected-pill">${exerciseData[index].name}</span>`).join("")
+    : `<span class="empty-selected">未选择运动</span>`;
 }
 
 function bindEvents() {
@@ -872,6 +907,18 @@ function bindEvents() {
 
   document.getElementById("editDataBtn").addEventListener("click", () => {
     setHeaderEditing(!document.body.classList.contains("header-editing"));
+  });
+
+  document.getElementById("profileBackdrop").addEventListener("click", () => {
+    setHeaderEditing(false);
+  });
+
+  document.getElementById("quickFoodBtn").addEventListener("click", () => {
+    switchTab("food");
+  });
+
+  document.getElementById("quickExerciseBtn").addEventListener("click", () => {
+    switchTab("exercise");
   });
 
   document.getElementById("saveProfileBtn").addEventListener("click", () => {

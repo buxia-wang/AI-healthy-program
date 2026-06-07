@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#1f7a5a" />
     <title>AI健康助手 第一版</title>
     <link rel="manifest" href="./manifest.webmanifest" />
-    <link rel="stylesheet" href="./styles.css?v=8" />
+    <link rel="stylesheet" href="./styles.css?v=11" />
   </head>
   <body>
     <header class="app-header">
@@ -28,7 +28,42 @@
     </header>
 
     <main class="app-shell">
-      <section class="panel profile-panel" aria-label="用户档案">
+      <section class="today-hero" aria-label="今日健康仪表盘">
+        <div class="hero-ring-card">
+          <div class="calorie-ring" id="calorieRing" aria-label="今日目标完成度">
+            <div class="ring-inner">
+              <span id="ringPercent">0%</span>
+              <small>今日热量</small>
+            </div>
+          </div>
+          <div class="hero-copy">
+            <p class="eyebrow">今日状态</p>
+            <h2 id="heroStatus">先记录今天的饮食或运动</h2>
+            <p id="heroMeta">目标、摄入和运动会在这里汇总。</p>
+          </div>
+        </div>
+        <div class="hero-stat-grid">
+          <article>
+            <span>今日摄入</span>
+            <strong id="heroIntake">0 kcal</strong>
+          </article>
+          <article>
+            <span>运动消耗</span>
+            <strong id="heroExercise">0 kcal</strong>
+          </article>
+          <article>
+            <span>相对目标</span>
+            <strong id="heroBalance">--</strong>
+          </article>
+        </div>
+        <div class="hero-actions">
+          <button class="primary-button" id="quickFoodBtn" type="button">+ 记饮食</button>
+          <button class="text-button" id="quickExerciseBtn" type="button">+ 记运动</button>
+        </div>
+      </section>
+
+      <section class="profile-backdrop" id="profileBackdrop" aria-hidden="true"></section>
+      <section class="panel profile-panel profile-drawer" aria-label="用户档案">
         <div class="section-title">
           <div>
             <p class="eyebrow">第 1 步</p>
@@ -115,7 +150,7 @@
         </div>
       </section>
 
-      <section class="results-grid" aria-label="健康概况">
+      <section class="results-grid metric-strip" aria-label="健康概况">
         <article class="metric">
           <span>BMI</span>
           <strong id="bmiValue">--</strong>
@@ -235,6 +270,7 @@
                 <input id="foodPickerSearch" type="search" placeholder="例如：米饭、牛肉面、沙拉、汉堡" />
               </label>
               <div class="multi-picker food-complex" id="foodMultiPicker" aria-label="常见食物多选"></div>
+              <div class="selected-tray food-complex" id="foodSelectedTray" aria-label="已选择食物"></div>
               <div class="inline-fields">
                 <label>
                   份数
@@ -296,6 +332,7 @@
                 <input id="exerciseSearch" type="search" placeholder="例如：快走、慢跑、家务" />
               </label>
               <div class="multi-picker" id="exerciseMultiPicker" aria-label="运动多选"></div>
+              <div class="selected-tray" id="exerciseSelectedTray" aria-label="已选择运动"></div>
               <div class="inline-fields">
                 <label>
                   分钟
@@ -361,6 +398,6 @@
       </div>
     </template>
 
-    <script src="./app.js?v=8"></script>
+    <script src="./app.js?v=11"></script>
   </body>
 </html>
